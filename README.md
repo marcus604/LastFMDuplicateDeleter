@@ -38,9 +38,15 @@ pipenv install
 pipenv shell
 python main.py
 ```
-Enter the requested details for it to run
+Provide config input
+1. Username - Your last.fm username
+2. Password - Your last.fm password (this all runs locally and the password will be stored in memory while the app runs)
+3. Dry Run {y/n} - A dry run will not delete any scrobbles but will produce a .csv file of all scrobbles it determines to be duplicates
+4. Time Threshold - How many seconds between identical scrobbles to be considered a duplicate - NOTE: Any song with a duration less than the time threshold played back to back will be considered a duplicate
+5. Scan all scrobbles {y/n} - Scan your entire library or start from a specific page and work forward in time
 
 
+NOTE: If you are scrobbling while this runs it may miss duplicates due to it working forward in time and anything that gets pushed a page will possibly be missed, if you dont want to stop scrobbling :) then you can just run the tool a second time, likelyhood of the same duplicate being skipped is very low.
 
 ## Author
 
