@@ -7,7 +7,7 @@ from configparser import ConfigParser
 #Libraries
 from selenium.webdriver import Chrome, ActionChains
 from selenium.webdriver.chrome.options import Options
-from selenium.common.exceptions import ElementNotInteractableException
+from selenium.common.exceptions import ElementNotInteractableException, NoSuchElementException
 
 #App
 from Classes import Scrobble, Config_Exception
@@ -34,10 +34,11 @@ def logLaunch():
 #Get selenium browser object
 def getBrowser():
     opts = Options()
-    opts.add_argument("--headless")
-    opts.add_argument("--window-size=1920,8600") #Combined with headless, sets resolution to be as tall as the whole page so all elements are viewable and interactable
+    #opts.add_argument("--headless")
+    #opts.add_argument("--window-size=1920,8600") #Combined with headless, sets resolution to be as tall as the whole page so all elements are viewable and interactable
     opts.add_argument("--log-level=3") #Prevents unwanted noise in terminal
     browser = Chrome(options=opts)
+    browser.delete_all_cookies()
     return browser
 
 #Check if scrobbles are considered duplicate based on artist, title and time difference between them
@@ -62,6 +63,13 @@ def deleteScrobble(browser, scrobbleRow):
 #Sign into last.fm with given username and password
 def signIn(browser, username, password):
     browser.get(URL_LOGIN)
+    
+    try:
+        cookiePopup = browser.find_element_by_id("accept-recommended-btn-handler")
+        cookiePopup.click()
+    except (NoSuchElementException, ElementNotInteractableException):
+        logger.debug("No cookie popup")
+
     
     userField = browser.find_element_by_id("id_username_or_email")
     userField.send_keys(username)
