@@ -34,8 +34,8 @@ def logLaunch():
 #Get selenium browser object
 def getBrowser():
     opts = Options()
-    #opts.add_argument("--headless")
-    #opts.add_argument("--window-size=1920,8600") #Combined with headless, sets resolution to be as tall as the whole page so all elements are viewable and interactable
+    opts.add_argument("--headless")
+    opts.add_argument("--window-size=1920,8600") #Combined with headless, sets resolution to be as tall as the whole page so all elements are viewable and interactable
     opts.add_argument("--log-level=3") #Prevents unwanted noise in terminal
     browser = Chrome(options=opts)
     browser.delete_all_cookies()
