@@ -65,7 +65,7 @@ def signIn(browser, username, password):
     browser.get(URL_LOGIN)
     
     try:
-        cookiePopup = browser.find_element_by_id("accept-recommended-btn-handler")
+        cookiePopup = browser.find_element_by_id("onetrust-accept-btn-handler")
         cookiePopup.click()
     except (NoSuchElementException, ElementNotInteractableException):
         logger.debug("No cookie popup")
