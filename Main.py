@@ -22,7 +22,7 @@ MODE_VERBOSE = False
 
 URL_BASE = "https://last.fm/user/"
 URL_PAGE = "/library?page="
-URL_LOGIN = "https://secure.last.fm/login"
+URL_LOGIN = "https://www.last.fm/login"
 
 
 #Log the launch of the app
@@ -123,7 +123,6 @@ def main():
 
             if userConfig["username"] == "":
                 raise Config_Exception("Username can't be blank")
-            
 
             password = input("Enter your last.fm password: ")
             if password == "":
