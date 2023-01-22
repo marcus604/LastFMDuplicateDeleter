@@ -52,12 +52,12 @@ def isDuplicate(first, second, timeThreshold):
 #Delete scrobble
 #Open more menu and click on delete button
 def deleteScrobble(browser, scrobbleRow):
-    parentRow = scrobbleRow.find_element_by_xpath("./..")
+    parentRow = scrobbleRow.find_element("xpath", "./..")
     hover = ActionChains(browser).move_to_element(parentRow)
     browser.implicitly_wait(10)
     hover.perform()
     scrobbleRow.click()
-    deleteButton = scrobbleRow.find_element_by_class_name("more-item--delete")
+    deleteButton = scrobbleRow.find_element("class name", "more-item--delete")
     deleteButton.click()
 
 #Sign into last.fm with given username and password
@@ -65,28 +65,28 @@ def signIn(browser, username, password):
     browser.get(URL_LOGIN)
     
     try:
-        cookiePopup = browser.find_element_by_id("onetrust-accept-btn-handler")
+        cookiePopup = browser.find_element("id","onetrust-accept-btn-handler")
         cookiePopup.click()
     except (NoSuchElementException, ElementNotInteractableException):
         logger.debug("No cookie popup")
 
     
-    userField = browser.find_element_by_id("id_username_or_email")
+    userField = browser.find_element("id","id_username_or_email")
     userField.send_keys(username)
 
-    passwordField = browser.find_element_by_id("id_password")
+    passwordField = browser.find_element("id","id_password")
     passwordField.send_keys(password)
 
-    browser.find_element_by_xpath("//div[@class='form-submit']/button[@class='btn-primary']").click()
+    browser.find_element("xpath", "//div[@class='form-submit']/button[@class='btn-primary']").click()
 
 #Create scrobble object from elements on page
 def generateScrobble(row):
     for i in range(0,5):
         while True:
             try:
-                artist = row.find_element_by_xpath(".//form/input[@name='artist_name']").get_attribute("value")
-                trackTitle = row.find_element_by_xpath(".//form/input[@name='track_name']").get_attribute("value")
-                timestamp = int(row.find_element_by_xpath(".//form/input[@name='timestamp']").get_attribute("value"))
+                artist = row.find_element("xpath", ".//form/input[@name='artist_name']").get_attribute("value")
+                trackTitle = row.find_element("xpath", ".//form/input[@name='track_name']").get_attribute("value")
+                timestamp = int(row.find_element("xpath", ".//form/input[@name='timestamp']").get_attribute("value"))
                 return Scrobble(artist, trackTitle, timestamp)
 
             except selenium.common.exceptions.NoSuchElementException as e:
@@ -172,7 +172,7 @@ def main():
             browser.get("{0}{1}1".format(URL_USER, URL_PAGE))
 
             #Get total number of pages for user
-            totalPages = int(browser.find_elements_by_class_name("pagination-page")[-1].text)
+            totalPages = int(browser.find_elements("class name", "pagination-page")[-1].text)
 
             #If specified page to start is given check that it is valid
             if scanAllScrobbles == "n":
@@ -223,7 +223,7 @@ def main():
             #Grab all tracks on page
             
             #Grabs all scrobbles on page
-            scrobbleRows = browser.find_elements_by_xpath("//td[@class='chartlist-more focus-control']")
+            scrobbleRows = browser.find_elements("xpath", "//td[@class='chartlist-more focus-control']")
 
             scrobbles = []
             scrobbleNumber = 0
