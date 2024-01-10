@@ -3,6 +3,7 @@ import sys
 import time
 from log import logging
 from configparser import ConfigParser
+from getpass import getpass
 
 #Libraries
 from selenium.webdriver import Chrome, ActionChains
@@ -37,6 +38,8 @@ def getBrowser():
     opts.add_argument("--headless")
     opts.add_argument("--window-size=1920,8600") #Combined with headless, sets resolution to be as tall as the whole page so all elements are viewable and interactable
     opts.add_argument("--log-level=3") #Prevents unwanted noise in terminal
+    opts.add_argument("--disable-dev-shm-usage")
+    opts.add_argument("--no-sandbox")
     browser = Chrome(options=opts)
     browser.delete_all_cookies()
     return browser
@@ -124,7 +127,7 @@ def main():
             if userConfig["username"] == "":
                 raise Config_Exception("Username can't be blank")
 
-            password = input("Enter your last.fm password: ")
+            password = getpass("Enter your last.fm password: ")
             if password == "":
                 raise Config_Exception("Password can't be blank")
 
@@ -139,7 +142,7 @@ def main():
             #Check that input is a number
             try:
                 if userConfig["time_threshold"] == "":
-                    userConfig["time_threshold"] = input("Enter time threshold in seconds between scrobbles to be considered a duplicate (60): ") or "60"
+                    userConfig["time_threshold"] = input("Enter time threshold in seconds between scrobbles to be considered a duplicate {60}: ") or "60"
                 else:
                     userConfig["time_threshold"] = input("Enter time in seconds between scrobbles to be considered a duplicate ({}): ".format(userConfig["time_threshold"])) or userConfig["time_threshold"]
 
