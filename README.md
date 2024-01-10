@@ -20,30 +20,55 @@ Due to limitations this is not a fast tool depending on your library size.
 My 210k library took about 6 hours to do a dry run and then another 10 hours to delete 8k duplicates.
 Both runs can be done in parts, but it is recommended to do the dry run in one go. 
 
-## Install
+## Docker Install
+
+1. Install Docker Desktop
+2. Clone repo
+    ```
+    git clone https://github.com/marcus604/LastFMDuplicateDeleter.git
+    ```
+3. Open a terminal and browse to where you cloned the repo
+4. Build the image
+    ```
+    docker build -t lastfmduplicatedeleter .
+    ```
+5. Run the image in interactive mode
+    ```
+    docker run -it lastfmduplicatedeleter
+    ```
+6. Follow [Usage](#usage)
+
+## Source Install
 
 1. Install python (3.9+)
 2. Install pipenv
 3. Install Chrome and Selenium chrome driver with matching version
 4. Clone repo 
-  ```sh
-git clone https://github.com/marcus604/LastFMDuplicateDeleter.git
-```
+   ```sh
+   git clone https://github.com/marcus604/LastFMDuplicateDeleter.git
+   ```
 5. Create environment and install dependencies
-```sh
-pipenv install
-```
+   ```sh
+   pipenv install
+   ```
+6. Enter the pip env
+   ```
+   pipenv shell
+   ```
+7. Launch the app
+   ```
+   python main.py
+   ```
+8. Follow [Usage](#usage)
+
 ## Usage
-```sh
-pipenv shell
-python main.py
-```
-Provide config input
-1. Username - Your last.fm username
-2. Password - Your last.fm password (this all runs locally and the password will be stored in memory while the app runs)
-3. Dry Run {y/n} - A dry run will not delete any scrobbles but will produce a .csv file of all scrobbles it determines to be duplicates
-4. Time Threshold - How many seconds between identical scrobbles to be considered a duplicate - NOTE: Any song with a duration less than the time threshold played back to back will be considered a duplicate
-5. Scan all scrobbles {y/n} - Scan your entire library or start from a specific page and work forward in time
+
+### Provide config input
+1. **Username** - Your last.fm username
+2. **Password** - Your last.fm password (this all runs locally and the password will be stored in memory while the app runs)
+3. **Dry Run _{y/n}_** - A dry run will not delete any scrobbles but will produce a .csv file of all scrobbles it determines to be duplicates
+4. **Time Threshold _{60}_** - How many seconds between identical scrobbles to be considered a duplicate - NOTE: Any song with a duration less than the time threshold played back to back will be considered a duplicate
+5. **Scan all scrobbles _{y/n}_** - Scan your entire library or start from a specific page and work forward in time
 
 
 NOTE: If you are scrobbling while this runs it may miss duplicates due to it working forward in time and anything that gets pushed a page will possibly be missed, if you dont want to stop scrobbling :) then you can just run the tool a second time, likelyhood of the same duplicate being skipped is very low.
