@@ -5,7 +5,7 @@ on:
 
 env:
   DOCKER_TAG: dev
-  DOCKER_IMAGE: ${{ env.DOCKER_REPO }}/${{ github.event.repository.name }}
+  DOCKER_IMAGE: ${{ github.event.repository.name }}
 
 jobs:
   build_test:
