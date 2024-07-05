@@ -5,7 +5,7 @@ on:
 
 env:
   DOCKER_TAG: dev
-  DOCKER_IMAGE: ${{ github.event.repository.name }}
+  DOCKER_IMAGE:
 
 jobs:
   build_test:
@@ -13,7 +13,9 @@ jobs:
 
     steps:
       - name: debug
-        run: echo "${{ $DOCKER_IMAGE | lower }}"
+        run: |
+          echo "${GITHUB_REPOSITORY@L}" >> $DOCKER_IMAGE
+          echo ${{ env.DOCKER_IMAGE }} 
 
       - name: Checkout Code
         uses: actions/checkout@v3
