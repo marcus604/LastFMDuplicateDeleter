@@ -1,0 +1,30 @@
+name: ci
+
+on:
+  pull_request:
+
+env:
+  DOCKER_TAG: dev
+  DOCKER_IMAGE: ${{ env.DOCKER_REPO }}/${{ github.event.repository.name }}
+
+jobs:
+  build_test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}  # Checkout the PR branch
+
+      - name: Build Docker Image
+        run: docker build -t ${{ env.DOCKER_IMAGE }} .
+
+      - name: Validate Docker Image
+        run: |
+          if [ "$(docker images -q ${{ env.DOCKER_IMAGE }} 2> /dev/null)" == "" ]; then
+            echo "Docker image build failed!"
+            exit 1
+          else
+            echo "Docker image build successful!"
+          fi
