@@ -12,6 +12,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: debug
+        run: echo "$DOCKER_IMAGE"
+
       - name: Checkout Code
         uses: actions/checkout@v3
         with:
