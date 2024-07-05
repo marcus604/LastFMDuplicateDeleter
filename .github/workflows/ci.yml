@@ -5,7 +5,7 @@ on:
 
 env:
   DOCKER_TAG: dev
-  DOCKER_IMAGE: ${{ github.event.repository.name }}
+  DOCKER_IMAGE: ${{ github.event.repository.name | lower }}
 
 jobs:
   build_test:
