@@ -5,17 +5,15 @@ on:
 
 env:
   DOCKER_TAG: dev
-  DOCKER_IMAGE:
 
 jobs:
   build_test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: debug
+      - id: lower-repo
         run: |
-          echo "${GITHUB_REPOSITORY@L}" >> $DOCKER_IMAGE
-          echo ${{ env.DOCKER_IMAGE }} 
+          echo "IMAGE=${GITHUB_REPOSITORY@L}" >> $GITHUB_OUTPUT
 
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -23,11 +21,11 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}  # Checkout the PR branch
 
       - name: Build Docker Image
-        run: docker build -t ${{ env.DOCKER_IMAGE }} .
+        run: docker build -t ${{ steps.lower-repo.outputs.repository  }} .
 
       - name: Validate Docker Image
         run: |
-          if [ "$(docker images -q ${{ env.DOCKER_IMAGE }} 2> /dev/null)" == "" ]; then
+          if [ "$(docker images -q ${{ steps.lower-repo.outputs.repository }} 2> /dev/null)" == "" ]; then
             echo "Docker image build failed!"
             exit 1
           else
