@@ -16,7 +16,8 @@ jobs:
           echo "DOCKER_IMAGE=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
       
       - name: use REPO
-        run: echo "The value of REPO is: ${DOCKER_IMAGE}"
+        run: |
+          echo "The value of REPO is: ${DOCKER_IMAGE}"
           
       - name: Checkout Code
         uses: actions/checkout@v3
