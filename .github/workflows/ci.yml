@@ -11,21 +11,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - id: lower-repo
+      - name: downcase REPO
         run: |
-          echo "IMAGE=${GITHUB_REPOSITORY@L}" >> $GITHUB_OUTPUT
-
+          echo "DOCKER_IMAGE=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
+      
+      - name: use REPO
+        run: echo "The value of REPO is: ${DOCKER_IMAGE}"
+          
       - name: Checkout Code
         uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.ref }}  # Checkout the PR branch
 
       - name: Build Docker Image
-        run: docker build -t ${{ steps.lower-repo.outputs.repository  }} .
+        run: docker build -t ${DOCKER_IMAGE} .
 
       - name: Validate Docker Image
         run: |
-          if [ "$(docker images -q ${{ steps.lower-repo.outputs.repository }} 2> /dev/null)" == "" ]; then
+          if [ "$(docker images -q ${DOCKER_IMAGE} 2> /dev/null)" == "" ]; then
             echo "Docker image build failed!"
             exit 1
           else
