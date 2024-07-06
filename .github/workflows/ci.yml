@@ -4,30 +4,53 @@ on:
   pull_request:
 
 env:
-  DOCKER_TAG: dev
+  env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_TAG: dev
 
 jobs:
-  docker_build:
+  build_and_push:
     runs-on: ubuntu-latest
 
-    steps:
-      - name: downcase REPO
-        run: |
-          echo "GITHUB_REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
-          
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+
+    steps:          
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}  # Checkout the PR branch
+      
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build Docker Image
-        run: docker build -t ${GITHUB_REPO} .
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ IMAGE_TAG }}
 
-      - name: Validate Docker Image
-        run: |
-          if [ "$(docker images -q ${GITHUB_REPO} 2> /dev/null)" == "" ]; then
-            echo "Docker image build failed!"
-            exit 1
-          else
-            echo "Docker image build successful!"
-          fi
+      - name: Build and push Docker image
+        id: push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
+        
