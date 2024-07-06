@@ -7,17 +7,13 @@ env:
   DOCKER_TAG: dev
 
 jobs:
-  build_test:
+  docker_build:
     runs-on: ubuntu-latest
 
     steps:
       - name: downcase REPO
         run: |
-          echo "DOCKER_IMAGE=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
-      
-      - name: use REPO
-        run: |
-          echo "The value of REPO is: ${DOCKER_IMAGE}"
+          echo "GITHUB_REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
           
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -25,11 +21,11 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}  # Checkout the PR branch
 
       - name: Build Docker Image
-        run: docker build -t ${DOCKER_IMAGE} .
+        run: docker build -t ${GITHUB_REPO} .
 
       - name: Validate Docker Image
         run: |
-          if [ "$(docker images -q ${DOCKER_IMAGE} 2> /dev/null)" == "" ]; then
+          if [ "$(docker images -q ${GITHUB_REPO} 2> /dev/null)" == "" ]; then
             echo "Docker image build failed!"
             exit 1
           else

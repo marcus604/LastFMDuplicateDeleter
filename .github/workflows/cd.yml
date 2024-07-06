@@ -1,0 +1,39 @@
+name: cd
+
+
+on:
+  push:
+    branches:
+      - main
+
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: downcase REPO
+        run: |
+          echo "GITHUB_REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
+
+    - name: downcase REPO
+      run: |
+        echo "GITHUB_OWNER=${GITHUB_OWNERY,,}" >>${GITHUB_ENV}
+
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        push: true
+        tags: ghcr.io/${{ github.repository_owner }}/${GITHUB_REPO}:${{ github.ref_name }}
+        
