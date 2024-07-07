@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM --platform=linux/amd64 python:3.12-slim
 
 #Install Google Chrome
 RUN apt update && apt -y install libglib2.0-dev libxi6 libnss3-dev wget gnupg zip

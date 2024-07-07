@@ -1,13 +1,16 @@
-name: ci
+name: cd
+
 
 on:
-  pull_request:
+  push:
+    branches:
+      - main
 
-env:
+
+eenv:
   env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  IMAGE_TAG: dev
 
 jobs:
   build_and_push:
@@ -37,9 +40,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=sha,prefix=,suffix=-${{ env.IMAGE_TAG }},format=short
-
-      # Why is this publishing multiple tags and why does onyl one work????
+            type=sha,prefix=,format=short
 
       - name: Build and push Docker image
         id: push
@@ -50,5 +51,3 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           provenance: false
-
-        
