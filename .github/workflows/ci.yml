@@ -40,10 +40,6 @@ jobs:
           tags: |
             type=sha,prefix=,suffix=-${{ env.IMAGE_TAG }},format=short
 
-      - name: debug image tags
-        run: |
-          echo "${{ steps.meta.outputs.tags }}"
-
       - name: Build and push Docker image
         id: push
         uses: docker/build-push-action@v6
@@ -52,6 +48,7 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          provenance: false
 
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v1
