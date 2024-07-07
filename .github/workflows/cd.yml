@@ -6,9 +6,7 @@ on:
     branches:
       - main
 
-
-eenv:
-  env:
+env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
