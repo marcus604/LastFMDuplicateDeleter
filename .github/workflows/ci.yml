@@ -36,7 +36,13 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=,suffix=-${{ env.IMAGE_TAG }},format=short
+
+      - name: debug image tags
+        run: |
+          echo "${{ steps.meta.outputs.tags }}"
 
       - name: Build and push Docker image
         id: push
