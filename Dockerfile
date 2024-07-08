@@ -1,7 +1,6 @@
 FROM --platform=linux/amd64 python:3.12-slim
 
-#Install Google Chrome
-RUN apt update && apt -y install libglib2.0-dev libxi6 libnss3-dev wget gnupg zip
+RUN apt update && apt -y install libglib2.0-dev libxi6 libnss3-dev wget gnupg zip curl
 
 RUN mkdir -m 0755 -p /etc/apt/keyrings/
 RUN wget -O- https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor | tee /etc/apt/keyrings/google-chrome.gpg > /dev/null
@@ -13,16 +12,14 @@ RUN chmod 644 /etc/apt/sources.list.d/google-chrome.list
 RUN apt update && apt -y install google-chrome-stable
 
 
-#Install Chrome Driver
-ENV CHROME_VERSION=120.0.6099.109
+RUN CHROMEDRIVER_VERSION=$(curl https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_STABLE); \
+    wget -N https://storage.googleapis.com/chrome-for-testing-public/$CHROMEDRIVER_VERSION/linux64/chromedriver-linux64.zip -P ~/ && \
+    unzip ~/chromedriver-linux64.zip -d ~/ && \
+    rm ~/chromedriver-linux64.zip && \
+    mv -f ~/chromedriver-linux64/chromedriver /usr/bin/chromedriver && \
+    rm -rf ~/chromedriver-linux64
 
-RUN wget "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/${CHROME_VERSION}/linux64/chromedriver-linux64.zip" \
-    && unzip chromedriver-linux64.zip && rm -dfr chromedriver_linux64.zip \
-    && mv /chromedriver-linux64/chromedriver /usr/bin/chromedriver \
-    && chmod +x /usr/bin/chromedriver
-
-
-#Install Selenium
+#Required for Selenium
 ENV DISPLAY=:99
 
 COPY ./app /app
