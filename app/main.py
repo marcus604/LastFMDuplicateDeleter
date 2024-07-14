@@ -119,6 +119,18 @@ def generateScrobble(row):
                 logger.info("Failed to find element, trying again")
 
 
+def dumpConfig():
+    logger.debug("USERNAME: {} - Type: {}".format(USERNAME, type(USERNAME)))
+    logger.debug(
+        "TIME_THRESHOLD: {} - Type: {}".format(TIME_THRESHOLD, type(TIME_THRESHOLD))
+    )
+    logger.debug("DELETE_MODE: {} - Type: {}".format(DELETE_MODE, type(DELETE_MODE)))
+    logger.debug(
+        "SCAN_FROM_PAGE: {} - Type: {}".format(SCAN_FROM_PAGE, type(SCAN_FROM_PAGE))
+    )
+    logger.debug("DEBUG: {} - Type: {}".format(DEBUG, type(DEBUG)))
+
+
 def validateConfig():
     try:
         if not USERNAME:
@@ -128,12 +140,20 @@ def validateConfig():
             raise Config_Exception("Password can't be blank")
 
         global DELETE_MODE
-        if DELETE_MODE == "True":
+        if DELETE_MODE == "true":
             DELETE_MODE = True
-        elif DELETE_MODE == "False":
+        elif DELETE_MODE == "false":
             DELETE_MODE = False
         else:
-            raise Config_Exception("Delete mode must be one of [True/False]")
+            raise Config_Exception("Delete mode must be one of [true/false]")
+
+        global DEBUG
+        if DEBUG == "true":
+            DEBUG = True
+        elif DEBUG == "false":
+            DEBUG = False
+        else:
+            raise Config_Exception("Debug must be one of [true/false]")
 
         try:
             global TIME_THRESHOLD
@@ -159,13 +179,14 @@ def main():
     # Log startup
     logLaunch()
 
-    if not validateConfig():
-        exit(1)
+    dumpConfig()
 
     if DELETE_MODE:
         isDryRun = False
+        logger.info("Running in delete mode; will delete duplicates")
     else:
         isDryRun = True
+        logger.info("Running in read only mode; will not delete any scrobbles")
 
     browser = getBrowser()
     logger.debug("Created browser object")
@@ -301,6 +322,9 @@ def main():
 #####################Launcher#####################
 ##################################################
 if __name__ == "__main__":
+
+    if not validateConfig():
+        exit(1)
 
     if DEBUG:
         logLevel = logging.DEBUG
