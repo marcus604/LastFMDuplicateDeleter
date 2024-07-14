@@ -22,6 +22,8 @@ RUN CHROMEDRIVER_VERSION=$(curl https://googlechromelabs.github.io/chrome-for-te
 #Required for Selenium
 ENV DISPLAY=:99
 
+RUN mkdir -p /app/csv
+
 COPY ./app /app
 WORKDIR /app
 
