@@ -1,8 +1,9 @@
 # Base
 import sys
 import time
+import os
 from log import logging
-from configparser import ConfigParser
+
 from getpass import getpass
 
 # Libraries
@@ -22,18 +23,21 @@ PROGRAM_NAME = "LastFM Duplicate Deleter"
 
 logger = getLogger(__name__, "logs/{}.log".format(PROGRAM_NAME))
 
-MODE_VERBOSE = False
-
 URL_BASE = "https://last.fm/user/"
 URL_PAGE = "/library?page="
 URL_LOGIN = "https://www.last.fm/login"
+
+USERNAME = os.environ.get("USERNAME")
+PASSWORD = os.environ.get("PASSWORD")
+TIME_THRESHOLD = os.environ.get("TIME_THRESHOLD")
+DELETE_MODE = os.environ.get("DELETE_MODE")
+SCAN_FROM_PAGE = os.environ.get("SCAN_FROM_PAGE")
+DEBUG = os.environ.get("DEBUG")
 
 
 # Log the launch of the app
 def logLaunch():
     logger.info("Starting {}".center(40, "=").format(PROGRAM_NAME))
-    if MODE_VERBOSE:
-        logger.info("Verbose Logging".center(40, "="))
 
 
 # Get selenium browser object
@@ -72,8 +76,8 @@ def deleteScrobble(browser, scrobbleRow):
     deleteButton.click()
 
 
-# Sign into last.fm with given username and password
-def signIn(browser, username, password):
+# Sign into last.fm with given username and USER_NAME
+def signIn(browser):
     browser.get(URL_LOGIN)
 
     try:
@@ -83,10 +87,10 @@ def signIn(browser, username, password):
         logger.debug("No cookie popup")
 
     userField = browser.find_element("id", "id_username_or_email")
-    userField.send_keys(username)
+    userField.send_keys(USERNAME)
 
     passwordField = browser.find_element("id", "id_password")
-    passwordField.send_keys(password)
+    passwordField.send_keys(PASSWORD)
 
     browser.find_element(
         "xpath", "//div[@class='form-submit']/button[@class='btn-primary']"
@@ -115,6 +119,39 @@ def generateScrobble(row):
                 logger.info("Failed to find element, trying again")
 
 
+def validateConfig():
+    try:
+        if not USERNAME:
+            raise Config_Exception("Username can't be blank")
+
+        if not PASSWORD:
+            raise Config_Exception("Password can't be blank")
+
+        global DELETE_MODE
+        if DELETE_MODE == "True":
+            DELETE_MODE = True
+        elif DELETE_MODE == "False":
+            DELETE_MODE = False
+        else:
+            raise Config_Exception("Delete mode must be one of [True/False]")
+
+        try:
+            global TIME_THRESHOLD
+            TIME_THRESHOLD = int(TIME_THRESHOLD)  # Check its a number
+        except ValueError:
+            raise Config_Exception("Time threshold must be a number")
+
+        try:
+            global SCAN_FROM_PAGE
+            SCAN_FROM_PAGE = int(SCAN_FROM_PAGE)  # Check its a number
+        except ValueError:
+            raise Config_Exception("Page to scan from must be a number")
+        return True
+    except Config_Exception as e:
+        logger.error("Configuration Error: {}".format(e))
+        return False
+
+
 ##################################################
 #################Main Application#################
 ##################################################
@@ -122,136 +159,44 @@ def main():
     # Log startup
     logLaunch()
 
-    print(
-        "DISCLAIMER: This script is not guaranteed and if out of date may delete incorrect scrobbles, recommended to backup scrobbles before continuing"
-    )
-    print(
-        "HIGHLY RECOMMENDED to do a dry run first to log all scrobbles to be deleted but not actually delete"
-    )
+    if not validateConfig():
+        exit(1)
 
-    # Get config file
-    config = ConfigParser()
+    if DELETE_MODE:
+        isDryRun = False
+    else:
+        isDryRun = True
 
-    config.read("config.ini")
-    userConfig = config["USER_PREFERENCES"]
+    browser = getBrowser()
+    logger.debug("Created browser object")
 
-    configValid = False
+    # Sign into users last.fm account
+    signIn(browser)
+    if browser.current_url == URL_LOGIN:
+        raise Config_Exception("Credentials invalid")
+    logger.debug("Signed in")
 
-    # Ask for config settings until they are valid
-    while not configValid:
+    # Browse to users library
+    URL_USER = "{0}{1}".format(URL_BASE, USERNAME)
+    browser.get("{0}{1}1".format(URL_USER, URL_PAGE))
 
-        try:
-            if userConfig["username"] == "":
-                userConfig["username"] = input("Enter your last.fm username: ")
-            else:
-                userConfig["username"] = (
-                    input(
-                        "Enter your last.fm username ({}): ".format(
-                            userConfig["username"]
-                        )
-                    )
-                    or userConfig["username"]
-                )
+    # Get total number of pages for user
+    totalPages = int(browser.find_elements("class name", "pagination-page")[-1].text)
 
-            if userConfig["username"] == "":
-                raise Config_Exception("Username can't be blank")
-
-            password = getpass("Enter your last.fm password: ")
-            if password == "":
-                raise Config_Exception("Password can't be blank")
-
-            dryRunPrompt = input("Dry Run {y/n} (y): ") or "y"
-            if dryRunPrompt == "n" or dryRunPrompt == "N":
-                isDryRun = False
-            elif dryRunPrompt == "y" or dryRunPrompt == "Y":
-                isDryRun = True
-            else:
-                raise Config_Exception('Dry run selection must be "y" or "n"')
-
-            # Check that input is a number
-            try:
-                if userConfig["time_threshold"] == "":
-                    userConfig["time_threshold"] = (
-                        input(
-                            "Enter time threshold in seconds between scrobbles to be considered a duplicate {60}: "
-                        )
-                        or "60"
-                    )
-                else:
-                    userConfig["time_threshold"] = (
-                        input(
-                            "Enter time in seconds between scrobbles to be considered a duplicate ({}): ".format(
-                                userConfig["time_threshold"]
-                            )
-                        )
-                        or userConfig["time_threshold"]
-                    )
-
-                timeThreshold = int(userConfig["time_threshold"])
-
-                # Ask to start on a page number for doing batches
-                scanAllScrobbles = input("Scan all scrobbles? {y/n} (y): ") or "y"
-                if scanAllScrobbles == "n":
-                    startOnPage = int(
-                        input("Enter page number to start scanning from : ")
-                    )
-                    if startOnPage <= 0:
-                        raise Config_Exception(
-                            "Page number must be greater than 0 and less than the total number of pages"
-                        )
-                elif scanAllScrobbles != "y" and scanAllScrobbles != "Y":
-                    raise Config_Exception(
-                        'Scan all scrobbles selection must be "y" or "n"'
-                    )
-
-            except (
-                ValueError
-            ):  # Input was not a number for time threshold or page number
-                raise Config_Exception("Input requires a number")
-
-            browser = getBrowser()
-            logger.debug("Created browser object")
-
-            # Sign into users last.fm account
-            signIn(browser, userConfig["username"], password)
-            if browser.current_url == URL_LOGIN:
-                raise Config_Exception("Credentials invalid")
-            logger.debug("Signed in")
-
-            # Browse to users library
-            URL_USER = "{0}{1}".format(URL_BASE, userConfig["username"])
-            browser.get("{0}{1}1".format(URL_USER, URL_PAGE))
-
-            # Get total number of pages for user
-            totalPages = int(
-                browser.find_elements("class name", "pagination-page")[-1].text
+    # If specified page to start is given check that it is valid
+    if SCAN_FROM_PAGE != 0:
+        if SCAN_FROM_PAGE > totalPages or SCAN_FROM_PAGE < 0:
+            raise Config_Exception(
+                "Page number must be greater than 0 and less than the total number of pages"
             )
+        else:
+            currentPage = SCAN_FROM_PAGE
+            totalPages = currentPage
+    else:
+        currentPage = totalPages
 
-            # If specified page to start is given check that it is valid
-            if scanAllScrobbles == "n":
-                if startOnPage > totalPages or startOnPage <= 0:
-                    raise Config_Exception(
-                        "Page number must be greater than 0 and less than the total number of pages"
-                    )
-                else:
-                    currentPage = startOnPage
-                    totalPages = currentPage
-            else:
-                currentPage = totalPages
-
-            browser.get("{0}{1}{2}".format(URL_USER, URL_PAGE, currentPage))
-            logger.info("Starting on page: {}".format(currentPage))
-
-            # Config is valid so can be saved now
-            configFile = open("config.ini", "w")
-            config.write(configFile)
-            configFile.close()
-
-            configValid = True
-
-        except Config_Exception as e:
-            logger.error("Configuration Error: {}".format(e))
-            continue
+    browser.get("{0}{1}{2}".format(URL_USER, URL_PAGE, currentPage))
+    logger.info("Starting on page: {}".format(currentPage))
 
     previousScrobble = ""
     elapsedTime = 0
@@ -262,12 +207,17 @@ def main():
 
         # Create .csv
         if isDryRun:
+            CSV_PATH = os.path.join(os.getcwd(), "csv")
             localTime = time.localtime()
-            scrobbleToDeleteFileName = "{} - ScrobblesToDelete.csv".format(
+            scrobblesToDeleteFileName = "{} - ScrobblesToDelete.csv".format(
                 time.strftime("%Y-%m-%d %H%M%S", localTime)
             )
+            scrobblesToDeleteFullPath = os.path.join(
+                CSV_PATH, scrobblesToDeleteFileName
+            )
+            print(scrobblesToDeleteFullPath)
             scrobblesToDeleteFile = open(
-                scrobbleToDeleteFileName, "w", encoding="utf-8"
+                scrobblesToDeleteFullPath, "w", encoding="utf-8"
             )
             scrobblesToDeleteFile.write("Page,Time,Artist,Title\n")
 
@@ -302,7 +252,7 @@ def main():
                 scrobble = generateScrobble(scrobbleRow)
 
                 logger.debug("Comparing {} : {}".format(previousScrobble, scrobble))
-                if isDuplicate(previousScrobble, scrobble, timeThreshold):
+                if isDuplicate(previousScrobble, scrobble, TIME_THRESHOLD):
 
                     numToDelete += 1
                     logger.info(
@@ -353,14 +303,11 @@ def main():
 ##################################################
 if __name__ == "__main__":
 
-    VERBOSE_FLAG = "-v"
-
+    if DEBUG:
+        logLevel = logging.DEBUG
+    else:
+        logLevel = logging.INFO
     logLevel = logging.INFO
-    if len(sys.argv) != 1:
-        for arg in sys.argv[1:]:
-            if arg == VERBOSE_FLAG:
-                logLevel = logging.DEBUG
-                MODE_VERBOSE = True
 
     logger.setLevel(logLevel)
     main()
