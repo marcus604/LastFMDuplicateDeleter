@@ -1,0 +1,14 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+    -   id: check-yaml
+    -   id: end-of-file-fixer
+    -   id: trailing-whitespace
+    -   id: no-commit-to-branch
+    -   id: requirements-txt-fixer
+-   repo: https://github.com/psf/black
+    rev: 24.4.2
+    hooks:
+    - id: black
+      language_version: python3.12
