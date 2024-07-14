@@ -215,7 +215,6 @@ def main():
             scrobblesToDeleteFullPath = os.path.join(
                 CSV_PATH, scrobblesToDeleteFileName
             )
-            print(scrobblesToDeleteFullPath)
             scrobblesToDeleteFile = open(
                 scrobblesToDeleteFullPath, "w", encoding="utf-8"
             )
@@ -307,7 +306,6 @@ if __name__ == "__main__":
         logLevel = logging.DEBUG
     else:
         logLevel = logging.INFO
-    logLevel = logging.INFO
 
     logger.setLevel(logLevel)
     main()
