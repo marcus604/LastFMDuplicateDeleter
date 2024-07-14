@@ -19,7 +19,7 @@ Due to limitations this is not a fast tool depending on your library size.
 My 210k library took about 6 hours to do a dry run and then another 10 hours to delete 8k duplicates.
 Both runs can be done in parts, but it is recommended to do the dry run in one go.
 
-## Docker Compose Setup - Recommended ([click here for more info](https://docs.linuxserver.io/general/docker-compose))
+## Docker Compose Setup - Recommended
 
 ```yaml
 ---
@@ -38,7 +38,7 @@ services:
          DEBUG: false
 ```
 
-## Docker CLI ([click here for more info](https://docs.docker.com/engine/reference/commandline/cli/))
+## Docker CLI
 
 ```sh
 docker run \
@@ -87,7 +87,7 @@ Containers are configured using parameters passed at runtime (such as those abov
 ### First Run to scan all scrobbles without deleting
 
 1. Create a new file named `docker-compose.yml`
-2. Copy the example [link](#docker-compose-setup---recommended) into that file
+2. Copy the example [docker-compose.yml](#docker-compose-setup---recommended) into that file
 3. Replace the 3 variables
     1. <your_lastfm_username> = Your last.fm username
     2. <your_lastfm_password> = Your last.fm password
@@ -133,6 +133,7 @@ Containers are configured using parameters passed at runtime (such as those abov
 ## Contributing
 
 I am more than happy to accept PR's for this project!
+
 
 
 ## Author
