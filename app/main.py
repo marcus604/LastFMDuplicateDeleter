@@ -27,8 +27,8 @@ URL_BASE = "https://last.fm/user/"
 URL_PAGE = "/library?page="
 URL_LOGIN = "https://www.last.fm/login"
 
-USERNAME = os.environ.get("USERNAME")
-PASSWORD = os.environ.get("PASSWORD")
+USERNAME = os.environ.get("LASTFM_USERNAME")
+PASSWORD = os.environ.get("LASTFM_PASSWORD")
 TIME_THRESHOLD = os.environ.get("TIME_THRESHOLD")
 DELETE_MODE = os.environ.get("DELETE_MODE")
 SCAN_FROM_PAGE = os.environ.get("SCAN_FROM_PAGE")
@@ -43,7 +43,8 @@ def logLaunch():
 # Get selenium browser object
 def getBrowser():
     opts = Options()
-    opts.add_argument("--headless")
+    if os.environ.get("SHOW_BROWSER") is None:
+        opts.add_argument("--headless")
     opts.add_argument(
         "--window-size=1920,8600"
     )  # Combined with headless, sets resolution to be as tall as the whole page so all elements are viewable and interactable
