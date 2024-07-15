@@ -30,8 +30,8 @@ services:
       volumes:
          - <your/local/path>:/app/csv
       environment:
-         USERNAME: <your_lastfm_username>
-         PASSWORD: <your_lastfm_password>
+         LASTFM_USERNAME: <your_lastfm_username>
+         LASTFM_PASSWORD: <your_lastfm_password>
          TIME_THRESHOLD: 60
          DELETE_MODE: false
          SCAN_FROM_PAGE: 0
@@ -43,8 +43,8 @@ services:
 ```sh
 docker run \
   --name=lastfmduplicatedeleter \
-  -e USERNAME=<your_lastfm_username> \
-  -e PASSWORD=<your_lastfm_password> \
+  -e LASTFM_USERNAME=<your_lastfm_username> \
+  -e LASTFM_PASSWORD=<your_lastfm_password> \
   -e TIME_THRESHOLD=60 \
   -e DELETE_MODE=false \
   -e SCAN_FROM_PAGE=0 \
@@ -59,8 +59,8 @@ Containers are configured using parameters passed at runtime (such as those abov
 
 | Parameter | Function | Default | Type
 | :----: | --- | --- | --- |
-| `-e USERNAME` | Your last.fm username | | String
-| `-e PASSWORD` | Your last.fm password | | String
+| `-e LASTFM_USERNAME` | Your last.fm username | | String
+| `-e LASTFM_PASSWORD` | Your last.fm password | | String
 | `-e TIME_THRESHOLD` |  How many seconds between identical scrobbles to be considered a duplicate - NOTE: Any song with a duration less than the time threshold played back to back will be considered a duplicate | 60 | Int
 | `-e DELETE_MODE` | Set this to true to delete scrobbles, otherwise it will only generate a list of duplicates | false | Boolean
 | `-e SCAN_FROM_PAGE` | Which page to start scanning for duplicates, page 1 is your most recent scrobbles - NOTE: Set to 0 will scan every scrobble | 0 | Int
@@ -74,12 +74,12 @@ Containers are configured using parameters passed at runtime (such as those abov
 1. Install docker & docker-compose - https://docs.docker.com/compose/install/
 2. Verify you have both installed correctly
     1. Open a command prompt and run
-       ```sh
+       ```
        docker --version
        docker-compose --version
        ```
     2. Verify your output looks like the below, if not then you need to troubleshoot your install
-       ```sh
+       ```
        Docker version 26.1.1, build 4cf5afa
        Docker Compose version v2.27.0-desktop.2
        ```
@@ -102,19 +102,19 @@ Containers are configured using parameters passed at runtime (such as those abov
           volumes:
             - /Users/stu/Documents/lastfmduplicatedeleter/:/app/csv
           environment:
-            USERNAME: gizzHead456
-            PASSWORD: hunter2
+            LASTFM_USERNAME: gizzHead456
+            LASTFM_PASSWORD: hunter2
             TIME_THRESHOLD: 60
             DELETE_MODE: false
             SCAN_FROM_PAGE: 0
             DEBUG: false
     ```
 5. Start the application and attach your terminal to it (You can pass in `-d` to run it in the background if you prefer to view the logs through other means or just want to get the csv and dont need to see the output)
-    ```sh
+    ```
     docker-compose up
     ```
 6. Depending on your computer it will take a minute or two to spin up the needed resources and start outputing its progress. It will show its current page, the % through all the pages and a rough ETA of its completion.
-    ```sh
+    ```
     2024-07-14 23:25:36,439 - __main__ - INFO - Checking page 67 - 42.56% - ETA 3.71 minutes
     2024-07-14 23:25:36,515 - __main__ - INFO - Checking page 66 - 42.58% - ETA 3.50 minutes
     2024-07-14 23:25:36,599 - __main__ - INFO - Checking page 65 - 42.60% - ETA 3.89 minutes
@@ -124,7 +124,7 @@ Containers are configured using parameters passed at runtime (such as those abov
 9. If you are happy with your results
     1. Set `DELETE_MODE: true` in your `docker-compose.yml`
     2. Start the application again
-        ```sh
+        ```
         docker-compose up
         ```
 
@@ -134,7 +134,52 @@ Containers are configured using parameters passed at runtime (such as those abov
 
 I am more than happy to accept PR's for this project!
 
+### Local Dev Environment
 
+Due to the nature of Selenium it is often much easier to debug issues by being able to see whats appearing in the virtual browser, this means that you need to setup the python environment and install Chrome and the Chrome driver manually.
+
+1. Install python (3.12+) (ideally with something like `pyenv`)
+2. Install pipenv
+3. Install Chrome and Selenium chrome driver with matching version
+
+    For ARM macOS
+
+    1. Download Chrome
+    2. Download the Matching Version Driver
+       ```
+       wget https://storage.googleapis.com/chrome-for-testing-public/<VERSION_MATCH_TO_YOUR_CHROME>/mac-arm64/chromedriver-mac-arm64.zip
+       ```
+    3. Unzip the driver and move to `/usr/local/bin` and ensure that `/usr/local/bin` is in your `PATH`
+
+4. Clone repo
+   ```
+   git clone https://github.com/marcus604/LastFMDuplicateDeleter.git
+   ```
+5. Create environment and install dependencies
+   ```
+   pipenv install -r requirements.txt
+   ```
+6. Enter the pip env
+   ```
+   pipenv shell
+   ```
+7. Set Required Environment Variables
+   ```
+   export LASTFM_LASTFM_USERNAME=gizzHead456
+   export LASTM_PASSWORD=hunter2
+   export TIME_THRESHOLD=60
+   export DELETE_MODE=false
+   export SCAN_FROM_PAGE=0
+   export DEBUG=false
+8. Optional - Set Selenium to show browser
+   ```
+   export SHOW_BROWSER=1
+   ```
+
+7. Launch the app
+   ```
+   python main.py
+   ```
 
 ## Author
 
