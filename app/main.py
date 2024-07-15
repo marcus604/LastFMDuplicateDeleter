@@ -23,7 +23,7 @@ PROGRAM_NAME = "LastFM Duplicate Deleter"
 
 logger = getLogger(__name__, "logs/{}.log".format(PROGRAM_NAME))
 
-URL_BASE = "https://last.fm/user/"
+URL_BASE = "https://www.last.fm/user/"
 URL_PAGE = "/library?page="
 URL_LOGIN = "https://www.last.fm/login"
 
@@ -226,7 +226,6 @@ def main():
     numToDelete = 0
 
     try:
-
         # Create .csv
         if isDryRun:
             CSV_PATH = os.path.join(os.getcwd(), "csv")
