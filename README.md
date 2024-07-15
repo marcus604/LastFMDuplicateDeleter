@@ -171,15 +171,19 @@ Due to the nature of Selenium it is often much easier to debug issues by being a
    export DELETE_MODE=false
    export SCAN_FROM_PAGE=0
    export DEBUG=false
+   ```
 8. Optional - Set Selenium to show browser
    ```
    export SHOW_BROWSER=1
    ```
-
-7. Launch the app
+9. Create csv folder
    ```
-   python main.py
+   mkdir csv
    ```
+10. Launch the app
+    ```
+    python main.py
+    ```
 
 ## Author
 

@@ -1,26 +1,13 @@
 ######Custom############
-config.py
-
+docker-compose*.yml
+local_dev/*
+csv/*
 
 #macOS
 .DS_Store
 
 #VSCode
 .vscode/*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ############PREMADE################
 # Byte-compiled / optimized / DLL files
