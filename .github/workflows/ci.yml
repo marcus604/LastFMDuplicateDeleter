@@ -11,6 +11,9 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,8 +24,13 @@ jobs:
       id-token: write
 
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@e3f713f2d8f53843e71c69a996d56f51aa9adfb9 # v2.14.1
+        with:
+          egress-policy: audit
+
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: step-security/docker-login-action@c3e677aae8393bc9c81cfdf9709648720ea4bd4d # v3.6.0
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -30,7 +38,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
@@ -39,7 +47,7 @@ jobs:
 
       - name: Build and push Docker image
         id: push
-        uses: docker/build-push-action@v6
+        uses: step-security/docker-build-push-action@a8c3d08b23f8be6aeed43eb1a14ce6fe51284438 # v6.18.0
         with:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
