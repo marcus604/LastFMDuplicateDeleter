@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 python:3.14-slim@sha256:1a3c6dbfd2173971abba880c3cc2ec4643690901f6ad6742d0827bae6cefc925
+FROM --platform=linux/amd64 python:3.14-slim@sha256:584e89d31009a79ae4d9e3ab2fba078524a6c0921cb2711d05e8bb5f628fc9b9
 
 RUN apt update && apt -y install libglib2.0-dev libxi6 libnss3-dev wget gnupg zip curl
 
