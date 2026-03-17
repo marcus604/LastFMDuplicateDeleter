@@ -4,7 +4,7 @@ certifi==2026.1.4
 exceptiongroup==1.1.0
 h11==0.14.0
 idna==3.4
-outcome==1.2.0
+outcome==1.3.0.post0
 PySocks==1.7.1
 selenium==4.7.2
 sniffio==1.3.1
